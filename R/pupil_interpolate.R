@@ -12,18 +12,25 @@
 #' @param time_column Optional column indicating time within trials, default "new_time"
 #' @return Tibble with interpolated pupil data
 #' @export
+#' @importFrom dplyr mutate group_by ungroup arrange select n
+#' @importFrom tibble as_tibble
+#' @importFrom zoo na.approx na.spline
 pupil_interpolate <- function(x, column, new_column, type = "cubic-spline",
                               maxgap = Inf, hz = "", plot = FALSE, plot_trial = "all",
                               trial_column = "CURRENT_TRIAL_NUMBER", time_column = "new_time") {
-  x_before <- dplyr::as_tibble(x)
-  
+
+  # Force data.frame/tibble mode to avoid data.table conflicts in package environments
+  x <- tibble::as_tibble(as.data.frame(x))
+  x_before <- x
+
   if ("UpSampled" %in% colnames(x)) hz <- 1000
   if (maxgap != Inf) maxgap <- round(maxgap / (1000 / hz))
-  
+
   x <- dplyr::mutate(x, pupil_val = .data[[column]])
-  
+
   interpolate <- function(x, type, maxgap) {
     x <- dplyr::group_by(x, .data[[trial_column]])
+    
     if (type == "cubic-spline") {
       x <- dplyr::mutate(x,
                          Missing.Total = ifelse(is.na(pupil_val), 1, 0),
@@ -35,28 +42,30 @@ pupil_interpolate <- function(x, column, new_column, type = "cubic-spline",
     } else if (type == "linear") {
       x <- dplyr::mutate(x, pupil_val = zoo::na.approx(pupil_val, na.rm = FALSE, maxgap = maxgap))
     }
-    
+
     if (!is.null(time_column) && time_column %in% colnames(x)) {
       x <- dplyr::arrange(x, .data[[trial_column]], .data[[time_column]])
     } else {
       x <- dplyr::arrange(x, .data[[trial_column]])
     }
-    
+
     x <- dplyr::ungroup(x)
     return(x)
   }
-  
-  # no dtplyr conversion here
-  x <- dplyr::as_tibble(x)
+
+  # Apply interpolation
   x <- interpolate(x, type, maxgap)
-  x <- dplyr::as_tibble(x)
-  
+
+  # Store interpolated values in new column
   x[[new_column]] <- x$pupil_val
   x$pupil_val <- NULL
-  
-  if (plot == TRUE) pupil_plot(x_before, x, trial = plot_trial,
-                               sub_title = paste0("pupil_interpolate(type = \"", type,
-                                                  "\", maxgap = ", maxgap,  ")"))
-  
+
+  # Optional plot
+  if (plot == TRUE) {
+    pupil_plot(x_before, x, trial = plot_trial,
+               sub_title = paste0("pupil_interpolate(type = \"", type,
+                                  "\", maxgap = ", maxgap,  ")"))
+  }
+
   return(x)
 }
