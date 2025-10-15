@@ -1,5 +1,0 @@
-export(format_p)
-export(pupil_interpolate)
-export(rbind.all.columns)
-export(theme_Publication)
-export(pupil_plot)
