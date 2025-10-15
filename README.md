@@ -8,4 +8,4 @@ You can install the package directly from GitHub:
 
 ```r
 install.packages("remotes")  # if not already installed
-remotes::install_github("baharsener/lcdlabr")
+remotes::install_github("baharsener/lcdlab_r", ref = "main")
