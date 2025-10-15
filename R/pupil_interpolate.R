@@ -46,8 +46,8 @@ pupil_interpolate <- function(x, column, new_column, type = "cubic-spline",
     return(x)
   }
   
+  # no dtplyr conversion here
   x <- dplyr::as_tibble(x)
-  x <- dtplyr::lazy_dt(x)
   x <- interpolate(x, type, maxgap)
   x <- dplyr::as_tibble(x)
   
