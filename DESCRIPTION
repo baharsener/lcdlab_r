@@ -1,0 +1,17 @@
+Package: lcdlab_r
+Type: Package
+Title: Custom Functions by LCD Lab Members
+Version: 0.1.0
+Author: Bahar Sener
+Maintainer: Bahar Sener <sbsener@uw.edu>
+Description: A collection of custom functions for pupil data processing, data manipulation, and plotting.
+License: MIT
+Encoding: UTF-8
+Imports:
+    dplyr,
+    dtplyr,
+    zoo,
+    stringr,
+    ggplot2,
+    grid,
+    ggthemes
