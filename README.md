@@ -1,6 +1,6 @@
 # lcdlab_r
 
-`lcdlab_r` is a collection of custom R functions developed in our lab for data analysis, pupillometry processing, and plotting. This package centralizes frequently used functions so they can be easily loaded and reused across projects.
+`lcdlab_r` is a collection of custom R functions developed in our lab for data analysis, pupillometry processing, and plotting. Has frequently used functions so they can be easily loaded and reused across projects.
 
 ## Installation
 
