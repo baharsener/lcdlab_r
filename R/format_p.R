@@ -8,11 +8,11 @@ format_p <- function(pval) {
   sapply(pval, function(p) {
     if (is.na(p)) return(NA_character_)
     if (p < .001) {
-      "p < .001"
+      " < .001"
     } else if (p < .01) {
-      paste0("p = ", stringr::str_remove(format(round(p, 3), nsmall = 3), "^0"))
+      paste0(" = ", stringr::str_remove(format(round(p, 3), nsmall = 3), "^0"))
     } else {
-      paste0("p = ", stringr::str_remove(format(round(p, 2), nsmall = 2), "^0"))
+      paste0(" = ", stringr::str_remove(format(round(p, 2), nsmall = 2), "^0"))
     }
   })
 }
