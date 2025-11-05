@@ -16,21 +16,22 @@
 #' @importFrom tibble as_tibble
 #' @importFrom zoo na.approx na.spline
 pupil_interpolate <- function(x, column, new_column, type = "cubic-spline",
-                              maxgap = Inf, hz = "", plot = FALSE, plot_trial = "all",
-                              trial_column = "CURRENT_TRIAL_NUMBER", time_column = "new_time") {
+                               maxgap = Inf, hz = "", plot = FALSE, plot_trial = "all",
+                               trial_column = "CURRENT_TRIAL_NUMBER", time_column = "new_time") {
+  x_before <- dplyr::as_tibble(x)
 
-  # Force data.frame/tibble mode to avoid data.table conflicts in package environments
-  x <- tibble::as_tibble(as.data.frame(x))
-  x_before <- x
-
-  if ("UpSampled" %in% colnames(x)) hz <- 1000
-  if (maxgap != Inf) maxgap <- round(maxgap / (1000 / hz))
+  if ("UpSampled" %in% colnames(x)) {
+    hz <- 1000
+  }
+  if (maxgap != Inf) {
+    maxgap <- round(maxgap / (1000 / hz))
+  }
 
   x <- dplyr::mutate(x, pupil_val = .data[[column]])
 
   interpolate <- function(x, type, maxgap) {
-    x <- dplyr::group_by(x, .data[[trial_column]])
-    
+    x <- dplyr::group_by(x, .data[[trial_column]])  # dynamically group by trial
+
     if (type == "cubic-spline") {
       x <- dplyr::mutate(x,
                          Missing.Total = ifelse(is.na(pupil_val), 1, 0),
@@ -53,19 +54,17 @@ pupil_interpolate <- function(x, column, new_column, type = "cubic-spline",
     return(x)
   }
 
-  # Apply interpolation
+  x <- dplyr::as_tibble(x)
+  x <- dtplyr::lazy_dt(x)
   x <- interpolate(x, type, maxgap)
+  x <- dplyr::as_tibble(x)
 
-  # Store interpolated values in new column
   x[[new_column]] <- x$pupil_val
   x$pupil_val <- NULL
 
-  # Optional plot
-  if (plot == TRUE) {
-    pupil_plot(x_before, x, trial = plot_trial,
-               sub_title = paste0("pupil_interpolate(type = \"", type,
-                                  "\", maxgap = ", maxgap,  ")"))
-  }
+  if (plot == TRUE) pupil_plot(x_before, x, trial = plot_trial,
+                               sub_title = paste0("pupil_interpolate(type = \"", type,
+                                                  "\", maxgap = ", maxgap,  ")"))
 
   return(x)
 }
